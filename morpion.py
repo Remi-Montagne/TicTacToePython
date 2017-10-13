@@ -25,11 +25,25 @@ class Match:
         """Initiate a mtch between player 1 and player 2.
         Score is in a dictionary.
         """
+        self.opponent = self.get_opponent()
         self.player1 = self.get_player("X")
-        self.player2 = self.get_player("O")
+        self.player2 = self.get_player("O") if self.opponent == 1 else "Ordinateur"
         self.scores = [0, 0]
         self.continue_match = True
     
+    def get_opponent(self):
+        print('############################################################\
+        \n\tBienvenue dans le jeu du morpion !\
+        \nVoulez-vous jouer contre une autre personne ou l\'ordinateur ?\
+        \n1 pour un adversaire humain\
+        \n2 pour l\'ordinateur')
+        while True:
+            inpt = input()
+            if inpt not in ['1', '2']:
+                print("Je ne comprends pas cette réponse.")
+            else:
+                return int(inpt)
+
     def get_player(self, nb):
         """Get the name of the players"""
         return input('Joueur {}: '.format(nb))
@@ -37,14 +51,14 @@ class Match:
     def play_match(self):
         """The steps of the match"""
         while self.continue_match:
-            my_grid = Grid(self.player1, self.player2)
+            my_grid = Grid(self.player1, self.player2, self.opponent)
             self.update_score(my_grid.play())
             self.continue_match = self.another_game()
         self.final_result()
         
     def update_score(self, winner):
         """Once a game has been played, update the final score"""
-        self.scores[winner] += 1
+        if winner != -1: self.scores[winner] += 1
 
     def another_game(self):
         """Ask the players if they want to play one more game"""
@@ -78,16 +92,20 @@ class Position:
 class Grid:
     """ The class for the tic-tac-toe grid.
     Here player1 is referred to as 1 and player2 as -1.
+    Grid is an abstract class. Its children are GridHumanAgainstHuman
+    and GridHumanAgainsComputer. They implement different version of
+    the method play.
     """
 
     EMPTY_CASE = """|_|"""
     O_CASE = """|O|"""
     X_CASE = """|X|"""
 
-    def __init__(self, player1, player2):
+    def __init__(self, player1, player2, opponent):
         """initiation of the grid"""
         self.grid = np.zeros((3,3))
         self.players = [player1, player2]
+        self.opponent = opponent
         self.current_player = self.get_first_player()
         self.player_scores = [1, -1]
         self.winner = -1
@@ -98,7 +116,16 @@ class Grid:
         print(self)
         while self.continue_game:
             #get the case to mark
-            position = self.get_case()
+            if self.current_player == 0:
+                position = self.get_case()
+            else:
+                if self.opponent == 1:
+                    position = self.get_case()
+                if self.opponent == 2:
+                    pos, score = mn.mini_max(self.grid)
+                    position = Position(pos[0], pos[1])
+
+            #if the player entered "stop", stop the game
             if position.line == -1 or position.col == -1 : break
                         
             #mark the case
@@ -210,6 +237,47 @@ class Grid:
         return res
 
 
+class GridHumanAgainstHuman(Grid):
+    def __init__(self, player1, player2):
+        super().__init__(player1, player2)
+
+
+class GridHumanAgainstComputer(Grid):
+    def __init__(self, player1, player2):
+        super().__init__(player1, player2)
+
+    def play(self):
+        """The succession of steps of a game"""
+        print(self)
+        while self.continue_game:
+            if self.current_player == 0:
+                #get the case to mark
+                position = self.get_case()
+                if position.line == -1 or position.col == -1 : break
+                            
+                #mark the case
+                self.mark_case(position, self.current_player)
+                
+                #process the end of turn
+                print(self)
+                self.check_grid()
+                self.change_player()
+            else:
+                #get the case to mark
+                move, score = mn.mini_max(self.grid)
+                if position.line == -1 or position.col == -1 : break
+                            
+                #mark the case
+                self.mark_case(position, self.current_player)
+                
+                #process the end of turn
+                print(self)
+                self.check_grid()
+                self.change_player()
+
+        print(self.end_of_game_message())
+        return self.winner
+    
 ########################################
 #                MAIN
 ########################################

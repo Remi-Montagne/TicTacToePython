@@ -19,26 +19,26 @@ def mini_max(grid, i=0, j=0, active_player=-1):
     """The minimax recursive algorithm"""
     moves = []
     scores = []
-    print(grid)
+    #print(grid)
     #check the possible next moves for the grid.
     possible_next_moves = get_possible_next_moves(grid)
     
     #if there is game over (i.e. grid full or a player wins), returns the corresponding score
     if game_over(possible_next_moves, grid):
-        print('end of branch')
+        #print('end of branch')
         return (i, j), get_score(grid)
     #else, a list of posssible next moves and associated scores is recursively generated.
     #given the active player, the max or min score and associated move will then be returned.
     else:
-        print('uncomplete grid')
+        #print('uncomplete grid')
         next_player = other_player(active_player)
         for (i, j) in possible_next_moves:
             moves.append((i, j))
             possible_grid = get_next_possible_grid(grid, i, j, active_player)
             move, score = mini_max(possible_grid, i, j, next_player)
             scores.append(score)
-    print(moves)
-    print(scores)
+    #print(moves)
+    #print(scores)
     return get_score_to_return(moves, scores, active_player)
 
 def get_possible_next_moves(grid):
@@ -107,7 +107,7 @@ def get_score_to_return(moves, scores, active_player):
 
 def main():
     test_grid = np.array([[1, 0, 0], [-1, 0, 0], [-1, 1, 1]])
-    print('Choisir le coup {}'.format(mini_max(test_grid)))
+    #print('Choisir le coup {}'.format(mini_max(test_grid)))
 
 if __name__ == '__main__':
     main()
