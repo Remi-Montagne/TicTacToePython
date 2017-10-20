@@ -124,6 +124,7 @@ class Grid:
                 if self.opponent == 2:
                     pos, score = mn.mini_max(self.grid)
                     position = Position(pos[0], pos[1])
+                    print('Ordinateur:')
 
             #if the player entered "stop", stop the game
             if position.line == -1 or position.col == -1 : break
